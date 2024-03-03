@@ -105,6 +105,7 @@ public final class AnimationManager {
                     if (checkInterruption("csv")) throw new InterruptedException();
                     line = line.endsWith(",") ? line.substring(0, line.length() - 1) : line;
                     String[] pattern = line.split(",");
+                    long start = System.currentTimeMillis();
                     if ((device.equals("phone1") && pattern.length == 5) // Phone (1) pattern on Phone (1)
                         || (device.equals("phone2") && pattern.length == 5) // Phone (1) pattern on Phone (2)
                         || (device.equals("phone2") && pattern.length == 33)) { // Phone (2) pattern on Phone (2)
@@ -113,7 +114,12 @@ public final class AnimationManager {
                         if (DEBUG) Log.d(TAG, "Animation line length mismatch | name: " + name + " | line: " + line);
                         throw new InterruptedException();
                     }
-                    Thread.sleep(10);
+                    long delay = 16666 - (System.currentTimeMillis() - start);
+                    if (device.equals("phone1")) {
+                        Thread.sleep(10);
+		    } else if (device.equals("phone2")) {
+                        Thread.sleep(delay/1000);
+		    }
                 }
             } catch (Exception e) {
                 if (DEBUG) Log.d(TAG, "Exception while playing animation | name: " + name + " | exception: " + e);
@@ -255,6 +261,7 @@ public final class AnimationManager {
                         if (checkInterruption("call")) throw new InterruptedException();
                         line = line.endsWith(",") ? line.substring(0, line.length() - 1) : line;
                         String[] pattern = line.split(",");
+                        long start = System.currentTimeMillis();
                         if ((device.equals("phone1") && pattern.length == 5) // Phone (1) pattern on Phone (1)
                             || (device.equals("phone2") && pattern.length == 5) // Phone (1) pattern on Phone (2)
                             || (device.equals("phone2") && pattern.length == 33)) { // Phone (2) pattern on Phone (2)
@@ -263,7 +270,12 @@ public final class AnimationManager {
                             if (DEBUG) Log.d(TAG, "Animation line length mismatch | name: " + name + " | line: " + line);
                             throw new InterruptedException();
                         }
-                        Thread.sleep(10);
+                        long delay = 16666 - (System.currentTimeMillis() - start);
+                        if (device.equals("phone1")) { 
+                    	    Thread.sleep(10);
+			} else if (device.equals("phone2")) { 
+                    	    Thread.sleep(delay/1000);
+			}
                     }
                 } catch (Exception e) {
                     if (DEBUG) Log.d(TAG, "Exception while playing animation | name: " + name + " | exception: " + e);
