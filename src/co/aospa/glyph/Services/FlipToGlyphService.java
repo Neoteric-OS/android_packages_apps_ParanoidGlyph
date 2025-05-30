@@ -23,6 +23,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.IBinder;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
 import co.aospa.glyph.Manager.AnimationManager;
@@ -36,6 +39,9 @@ public class FlipToGlyphService extends Service {
     private boolean isFlipped;
     private int ringerMode;
 
+    private HandlerThread thread;
+    private Handler mThreadHandler;
+
     private AudioManager mAudioManager;
     private FlipToGlyphSensor mFlipToGlyphSensor;
     private Context mContext;
@@ -43,6 +49,12 @@ public class FlipToGlyphService extends Service {
     @Override
     public void onCreate() {
         if (DEBUG) Log.d(TAG, "Creating service");
+
+        // Add a handler thread
+        thread = new HandlerThread("FlipToGlyphService");
+        thread.start();
+        Looper looper = thread.getLooper();
+        mThreadHandler = new Handler(looper);
 
         mContext = this;
         mFlipToGlyphSensor = new FlipToGlyphSensor(this, this::onFlip);
@@ -60,6 +72,7 @@ public class FlipToGlyphService extends Service {
     public void onDestroy() {
         if (DEBUG) Log.d(TAG, "Destroying service");
         mFlipToGlyphSensor.disable();
+        thread.quit();
         super.onDestroy();
     }
 
@@ -72,7 +85,9 @@ public class FlipToGlyphService extends Service {
         if (flipped == isFlipped) return;
         if (DEBUG) Log.d(TAG, "Flipped: " + flipped);
         if (flipped) {
-            AnimationManager.playCsv(mContext, "flip");
+            mThreadHandler.post(() -> {
+                AnimationManager.playCsv(mContext, "flip");
+            });
             ringerMode = mAudioManager.getRingerModeInternal();
             mAudioManager.setRingerModeInternal(AudioManager.RINGER_MODE_SILENT);
         } else {
